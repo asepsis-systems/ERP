@@ -7,6 +7,35 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Unidad {
+  id        String   @id @default(uuid())
+  codigo    Int      @unique
+  tipo      String   // "H 100", "X 30"
+  placa     String   @unique
+  marca     String   // "HYUNDAI", "SHINERAY"
+  chofer    String
+  estado    String   @default("Activo")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  rutas     Ruta[]
+}
+
+model Ruta {
+  id          String   @id @default(uuid())
+  numeroRuta  Int      // #741, #737, etc.
+  horaSalida  String   @default("06:00")
+  horaRetorno String?  @default("--:--")
+  unidadCodigo Int?
+  unidad      Unidad?  @relation(fields: [unidadCodigo], references: [codigo])
+  chofer      String
+  ayudante    String?  @default("")
+  destinos    String   // JSON string con array de nombres de clientes
+  fecha       String   // YYYY-MM-DD
+  estado      String   @default("En Ruta")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model Articulo {
   id               String              @id @default(uuid())
   codigo           String              @unique
@@ -26,37 +55,37 @@ model Articulo {
 }
 
 model Proveedor {
-  id           String        @id @default(uuid())
-  ruc          String        @unique
-  razonSocial  String
-  contacto     String?
-  telefono     String?
-  email        String?
-  direccion    String?
-  condicionPago String?      @default("Contado")
-  estado       String        @default("ACTIVO")
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  ordenes      OrdenCompra[]
+  id            String        @id @default(uuid())
+  ruc           String        @unique
+  razonSocial   String
+  contacto      String?
+  telefono      String?
+  email         String?
+  direccion     String?
+  condicionPago String?       @default("Contado")
+  estado        String        @default("ACTIVO")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  ordenes       OrdenCompra[]
 }
 
 model OrdenCompra {
-  id              String            @id @default(uuid())
-  numero          String            @unique
-  fecha           DateTime          @default(now())
-  fechaEntrega    DateTime?
-  proveedorId     String
-  proveedor       Proveedor         @relation(fields: [proveedorId], references: [id])
-  estado          String            @default("PENDIENTE") // PENDIENTE, APROBADA, RECIBIDA, ANULADA
-  subtotal        Float             @default(0)
-  igv             Float             @default(0)
-  total           Float             @default(0)
-  observaciones   String?
-  solicitante     String?           @default("Logística")
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  items           OrdenCompraItem[]
-  movimientos     MovimientoAlmacen[]
+  id            String              @id @default(uuid())
+  numero        String              @unique
+  fecha         DateTime            @default(now())
+  fechaEntrega  DateTime?
+  proveedorId   String
+  proveedor     Proveedor           @relation(fields: [proveedorId], references: [id])
+  estado        String              @default("PENDIENTE")
+  subtotal      Float               @default(0)
+  igv           Float               @default(0)
+  total         Float               @default(0)
+  observaciones String?
+  solicitante   String?             @default("Logística")
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  items         OrdenCompraItem[]
+  movimientos   MovimientoAlmacen[]
 }
 
 model OrdenCompraItem {
@@ -72,19 +101,19 @@ model OrdenCompraItem {
 }
 
 model MovimientoAlmacen {
-  id             String       @id @default(uuid())
-  tipo           String       // ENTRADA, SALIDA, AJUSTE
-  fecha          DateTime     @default(now())
-  articuloId     String
-  articulo       Articulo     @relation(fields: [articuloId], references: [id])
-  cantidad       Float
-  stockAnterior  Float        @default(0)
-  stockNuevo     Float        @default(0)
-  motivo         String       // Compra, Despacho Operaciones, Merma, Devolución, Ajuste Inventario
-  documentoRef   String?      // Guía, Factura, Orden de Compra #
-  responsable    String       @default("Logística")
-  ordenCompraId  String?
-  ordenCompra    OrdenCompra? @relation(fields: [ordenCompraId], references: [id])
-  observaciones  String?
-  createdAt      DateTime     @default(now())
+  id            String       @id @default(uuid())
+  tipo          String
+  fecha         DateTime     @default(now())
+  articuloId    String
+  articulo      Articulo     @relation(fields: [articuloId], references: [id])
+  cantidad      Float
+  stockAnterior Float        @default(0)
+  stockNuevo    Float        @default(0)
+  motivo        String
+  documentoRef  String?
+  responsable   String       @default("Logística")
+  ordenCompraId String?
+  ordenCompra   OrdenCompra? @relation(fields: [ordenCompraId], references: [id])
+  observaciones String?
+  createdAt     DateTime     @default(now())
 }

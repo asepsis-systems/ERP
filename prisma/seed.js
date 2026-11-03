@@ -2,167 +2,99 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Sembrando datos iniciales de Logística...');
+  console.log('Sembrando datos exactos de Unidades y Rutas de Logística...');
 
-  // Limpiar datos
-  await prisma.movimientoAlmacen.deleteMany();
-  await prisma.ordenCompraItem.deleteMany();
-  await prisma.ordenCompra.deleteMany();
-  await prisma.articulo.deleteMany();
-  await prisma.proveedor.deleteMany();
+  await prisma.ruta.deleteMany();
+  await prisma.unidad.deleteMany();
 
-  // Proveedores
-  const prov1 = await prisma.proveedor.create({
-    data: {
-      ruc: '20100047218',
-      razonSocial: 'MATACHANA PERU S.A.C.',
-      contacto: 'Ing. Carlos Ramos',
-      telefono: '+51 987 654 321',
-      email: 'ventas@matachana.com.pe',
-      direccion: 'Av. Industrial 450, Lima',
-      condicionPago: 'Crédito 30 días',
-      estado: 'ACTIVO',
+  // 1. Sembrar las 9 Unidades exactas de la captura de pantalla
+  const unidadesData = [
+    { codigo: 1, tipo: 'H 100', placa: 'CBH-936', marca: 'HYUNDAI', chofer: 'Edgar Lopez Dominguez', estado: 'Activo' },
+    { codigo: 2, tipo: 'H 100', placa: 'AHW-911', marca: 'HYUNDAI', chofer: 'Ricardo García Julca', estado: 'Activo' },
+    { codigo: 3, tipo: 'H 100', placa: 'ASN-735', marca: 'HYUNDAI', chofer: 'Edwin John Poma Pituy', estado: 'Activo' },
+    { codigo: 4, tipo: 'H 100', placa: 'AVX-938', marca: 'HYUNDAI', chofer: 'Edwin Challa Sillcahue', estado: 'Activo' },
+    { codigo: 5, tipo: 'H 100', placa: 'AYQ-870', marca: 'HYUNDAI', chofer: 'Reynaldo Geronimo Medoza', estado: 'Activo' },
+    { codigo: 6, tipo: 'X 30', placa: 'BBC-766', marca: 'SHINERAY', chofer: 'Jorge Antonio Davila Andia', estado: 'Activo' },
+    { codigo: 7, tipo: 'X 30', placa: 'CLJ-797', marca: 'SHINERAY', chofer: 'Egner Hidalgo Loja', estado: 'Activo' },
+    { codigo: 8, tipo: 'X 30', placa: 'CLJ-930', marca: 'SHINERAY', chofer: 'Kevin Kid Espinoza Huaraca', estado: 'Activo' },
+    { codigo: 9, tipo: 'H 100', placa: 'BTU-716', marca: 'HYUNDAI', chofer: 'Miguel Angel Davila Andia', estado: 'Activo' },
+  ];
+
+  for (const u of unidadesData) {
+    await prisma.unidad.create({ data: u });
+  }
+  console.log('✔ 9 Unidades creadas');
+
+  // 2. Sembrar las Rutas de la Proyección de Rutas
+  const today = new Date().toISOString().split('T')[0];
+  const rutasData = [
+    {
+      numeroRuta: 741,
+      horaSalida: '06:00',
+      horaRetorno: '10:15',
+      unidadCodigo: 3,
+      chofer: 'Pituy',
+      ayudante: '',
+      destinos: JSON.stringify(['MEDAVAN', 'RISSO', 'DR. LLANOS', 'PRIME AESTETIC', 'ÑAHUI', 'AVENDAÑO', 'CLINICA ANGLO']),
+      fecha: today,
     },
-  });
-
-  const prov2 = await prisma.proveedor.create({
-    data: {
-      ruc: '20508923412',
-      razonSocial: 'INSUMOS MEDICOS Y QUIMICOS DEL PERU S.A.',
-      contacto: 'Mariana Flores',
-      telefono: '+51 912 345 678',
-      email: 'contacto@inmedperu.pe',
-      direccion: 'Jr. Los Cedros 128, San Isidro',
-      condicionPago: 'Contado',
-      estado: 'ACTIVO',
+    {
+      numeroRuta: 737,
+      horaSalida: '06:00',
+      horaRetorno: '--:--',
+      unidadCodigo: 7,
+      chofer: 'Egner',
+      ayudante: '',
+      destinos: JSON.stringify(['LANATTA', 'INSANOR']),
+      fecha: today,
     },
-  });
-
-  const prov3 = await prisma.proveedor.create({
-    data: {
-      ruc: '20601239841',
-      razonSocial: 'EMPAQUES Y SELLOS ESTERILES DEL PACIFICO',
-      contacto: 'Roberto Soto',
-      telefono: '+51 945 112 233',
-      email: 'pedidos@empaquesesteriles.pe',
-      direccion: 'Calle Los Plásticos 890, Callao',
-      condicionPago: 'Crédito 15 días',
-      estado: 'ACTIVO',
+    {
+      numeroRuta: 738,
+      horaSalida: '06:00',
+      horaRetorno: '08:15',
+      unidadCodigo: 1,
+      chofer: 'Ignacio / Na...',
+      ayudante: '',
+      destinos: JSON.stringify(['SABOGAL']),
+      fecha: today,
     },
-  });
-
-  // Artículos
-  const art1 = await prisma.articulo.create({
-    data: {
-      codigo: 'INS-001',
-      nombre: 'Indicador Biológico Vapor 24h',
-      descripcion: 'Ampolla con esporas Geobacillus stearothermophilus para autoclaves',
-      categoria: 'Control de Calidad',
-      unidadMedida: 'CJA x 50',
-      stockActual: 24,
-      stockMinimo: 10,
-      precioReferencia: 240.00,
-      ubicacion: 'Estante A-1 (Refrigerado)',
+    {
+      numeroRuta: 739,
+      horaSalida: '06:00',
+      horaRetorno: '--:--',
+      unidadCodigo: 2,
+      chofer: 'Ricardo',
+      ayudante: 'Kenji',
+      destinos: JSON.stringify(['SANTA ISABEL', 'CLINICA SAN BORJA', 'CEFRA', 'PROVISION 2000', 'AUNA']),
+      fecha: today,
     },
-  });
-
-  const art2 = await prisma.articulo.create({
-    data: {
-      codigo: 'INS-002',
-      nombre: 'Rollo Manga Mixta Papel Grado Médico 20cm x 100m',
-      descripcion: 'Bobina termosellable para empaque de instrumental quirúrgico',
-      categoria: 'Empaque',
-      unidadMedida: 'RLL',
-      stockActual: 15,
-      stockMinimo: 8,
-      precioReferencia: 110.50,
-      ubicacion: 'Estante B-2',
+    {
+      numeroRuta: 743,
+      horaSalida: '06:00',
+      horaRetorno: '--:--',
+      unidadCodigo: 4,
+      chofer: 'Reynaldo',
+      ayudante: '',
+      destinos: JSON.stringify(['SAN JUAN DE DIOS', 'LOS ROSALES', 'SAN FELIPE - LA MOLINA']),
+      fecha: today,
     },
-  });
-
-  const art3 = await prisma.articulo.create({
-    data: {
-      codigo: 'INS-003',
-      nombre: 'Cinta Testigo Control Vapor',
-      descripcion: 'Cinta adhesiva viraje químico para autoclaves a vapor',
-      categoria: 'Control de Calidad',
-      unidadMedida: 'RLL',
-      stockActual: 4,
-      stockMinimo: 10, // Stock bajo de prueba
-      precioReferencia: 28.00,
-      ubicacion: 'Estante A-2',
+    {
+      numeroRuta: 748,
+      horaSalida: '06:15',
+      horaRetorno: '08:45',
+      unidadCodigo: null,
+      chofer: 'Onésimo',
+      ayudante: '',
+      destinos: JSON.stringify(['EUROCLINICA', 'MIRAFLORES', 'CASIMIRO']),
+      fecha: today,
     },
-  });
+  ];
 
-  const art4 = await prisma.articulo.create({
-    data: {
-      codigo: 'QUI-001',
-      nombre: 'Detergente Enzimático Multienzimático 5L',
-      descripcion: 'Solución biodegradable 4 enzimas para lavado de instrumental',
-      categoria: 'Lavado y Desinfección',
-      unidadMedida: 'BID',
-      stockActual: 8,
-      stockMinimo: 5,
-      precioReferencia: 185.00,
-      ubicacion: 'Área Química Q-1',
-    },
-  });
-
-  const art5 = await prisma.articulo.create({
-    data: {
-      codigo: 'REP-001',
-      nombre: 'Empaque / Junta Siliconada Puerta Autoclave 50x50',
-      descripcion: 'Repuesto original para cámara esterilizadora',
-      categoria: 'Repuestos',
-      unidadMedida: 'UND',
-      stockActual: 2,
-      stockMinimo: 2,
-      precioReferencia: 350.00,
-      ubicacion: 'Cajón Técnico M-1',
-    },
-  });
-
-  // Orden de compra de prueba
-  const orden1 = await prisma.ordenCompra.create({
-    data: {
-      numero: 'OC-2026-0001',
-      proveedorId: prov1.id,
-      estado: 'RECIBIDA',
-      subtotal: 480.00,
-      igv: 86.40,
-      total: 566.40,
-      observaciones: 'Llegó conforme con Guía de Remisión 001-4921',
-      solicitante: 'William (Logística)',
-      items: {
-        create: [
-          {
-            articuloId: art1.id,
-            cantidad: 2,
-            precioUnitario: 240.00,
-            subtotal: 480.00,
-          },
-        ],
-      },
-    },
-  });
-
-  // Movimiento inicial de almacén (Kardex)
-  await prisma.movimientoAlmacen.create({
-    data: {
-      tipo: 'ENTRADA',
-      articuloId: art1.id,
-      cantidad: 2,
-      stockAnterior: 22,
-      stockNuevo: 24,
-      motivo: 'Recepción Orden de Compra',
-      documentoRef: 'OC-2026-0001 / GR-001-4921',
-      responsable: 'William (Logística)',
-      ordenCompraId: orden1.id,
-      observaciones: 'Lote 2026-X, Vencimiento 2028-12',
-    },
-  });
-
-  console.log('¡Datos sembrados exitosamente en SQLite local!');
+  for (const r of rutasData) {
+    await prisma.ruta.create({ data: r });
+  }
+  console.log('✔ Rutas de proyección sembradas');
+  console.log('¡Base de datos sincronizada con las capturas de pantalla!');
 }
 
 main()
